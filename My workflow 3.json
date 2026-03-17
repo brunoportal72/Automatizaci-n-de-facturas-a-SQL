@@ -1,0 +1,110 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20,
+              "triggerAtMinute": 42
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "25a4d9cf-b94a-4475-aa87-7f5c084bda4e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "USE ComercialAndina\nSELECT * FROM v_resumen_hoy;"
+      },
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8b10aa3f-62cd-4bb2-b1c5-41a029134a45",
+      "name": "Microsoft SQL",
+      "credentials": {
+        "microsoftSql": {
+          "id": "mntF7uufPazMl6wG",
+          "name": "Microsoft SQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "brunoportal72@gmail.com",
+        "subject": "=Resumen facturas del día {{ $now.toFormat('dd/MM/yyyy') }}",
+        "emailType": "text",
+        "message": "=Facturas procesadas hoy: {{ $json.total_facturas }} Total PEN: {{ $json.total_pen }} Total USD: {{ $json.total_usd }} Números: {{ $json.nros_factura }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6005dd47-ee82-4751-b23b-5d1ab17687ba",
+      "name": "Send a message",
+      "webhookId": "a2404a9c-a220-4cc3-98e0-ca1da330a636",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G0XSRpd55GxgzD6s",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Microsoft SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Microsoft SQL": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b48a2bbc-890f-4aa7-9f28-94de328fa72c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64befafeecdeb9ba03cc70ef4f551762dd69db8626074dfcc42851edef9477e4"
+  },
+  "id": "kBMyQPy1pUg26F8Y",
+  "tags": []
+}

@@ -1,0 +1,190 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "filters": {
+          "q": "subject:factura has:attachment after:2026/03/01"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2f1e46e1-d58f-4fbe-a8c6-15482d69fd25",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G0XSRpd55GxgzD6s",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5001/procesar",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "={ $binary.attachment_0 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "2c05238b-549c-41fe-a283-c68725225e70",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f5cfc8f5-492f-44f4-9c0c-af7eb52e28f0",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "07b63659-9abc-4c48-8deb-99a374ae9c2a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO facturas_recibidas \n(nro_factura, ruc_emisor, proveedor, ruc_cliente, fecha_emision, monto_total, moneda, archivo_origen)\nVALUES (\n  '{{ $json.data.nro_factura }}',\n  '{{ $json.data.ruc_emisor }}',\n  '{{ $json.data.proveedor }}',\n  '{{ $json.data.ruc_cliente }}',\n  '{{ $json.data.fecha_emision }}',\n  {{ $json.data.monto_total }},\n  '{{ $json.data.moneda }}',\n  '{{ $json.filename_original }}'\n)"
+      },
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        -80
+      ],
+      "id": "18ff37ae-82ad-4430-bf72-0ed626caca27",
+      "name": "Microsoft SQL",
+      "credentials": {
+        "microsoftSql": {
+          "id": "mntF7uufPazMl6wG",
+          "name": "Microsoft SQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "brunoportal72@gmail.com",
+        "subject": "Error procesando factura",
+        "message": "=No se pudo procesar la factura {{ $json.filename_original }}.  Campos faltantes: {{ $json.missing }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        144
+      ],
+      "id": "3d99a9c0-d234-4df8-a040-db69fff7f57c",
+      "name": "Send a message",
+      "webhookId": "c77c9443-bf77-407c-8155-daed9c159aed",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "G0XSRpd55GxgzD6s",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Microsoft SQL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "04d506a1-5460-41ab-8b9f-a0a401e965d1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64befafeecdeb9ba03cc70ef4f551762dd69db8626074dfcc42851edef9477e4"
+  },
+  "id": "5hk29Z9Pf2908Eli",
+  "tags": []
+}
