@@ -48,7 +48,7 @@ pip install flask img2pdf pdfplumber Pillow pyodbc
 python app.py
 n8n
 bashdocker start n8n
-# Acceder en http://localhost:5678
+# Acceder en http://localhost:(tu_url)
 Importar los workflows desde la carpeta /workflows.
 
 📁 Estructura del proyecto
@@ -62,7 +62,6 @@ factura_api/
     └── workflow_resumen_diario.json
 
 📌 Notas
-
 El sistema soporta facturas electrónicas SUNAT con texto embebido (no escaneadas)
 PDFs escaneados retornan status: error con mensaje descriptivo
 El resumen diario se envía automáticamente a las 6pm con el consolidado del día
